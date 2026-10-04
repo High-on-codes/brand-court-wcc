@@ -1,26 +1,25 @@
 @import "tailwindcss";
 
 :root {
-  /* Editorial courtroom palette — a fixed paper theme, not OS dark/light. */
-  --paper: #f1ead9;
-  --paper-raised: #faf6ec;
-  --ink: #241e18;
-  --ink-muted: #6e6050;
-  --rule: #c9b998;
-  --rule-strong: #8d7a5c;
+  --paper: #f7f8fa;
+  --paper-raised: #ffffff;
+  --ink: #111827;
+  --ink-muted: #6b7280;
+  --rule: #e5e7eb;
+  --rule-strong: #9ca3af;
 
-  --prosecution: #7a2420;
-  --prosecution-bg: #f6e6e2;
-  --defense: #1f3a5f;
-  --defense-bg: #e4ebf2;
-  --jury: #4a3b5c;
-  --jury-bg: #ece6f0;
-  --verdict: #7a5c1e;
-  --verdict-bg: #f3ecd9;
+  --prosecution: #dc2626;
+  --prosecution-bg: #fef2f2;
+  --defense: #2563eb;
+  --defense-bg: #eff6ff;
+  --jury: #7c3aed;
+  --jury-bg: #f5f3ff;
+  --verdict: #d97706;
+  --verdict-bg: #fffbeb;
 
-  --stamp-accept: #2f5233;
-  --stamp-reject: #7a2420;
-  --stamp-lock: #1f3a5f;
+  --stamp-accept: #16a34a;
+  --stamp-reject: #dc2626;
+  --stamp-lock: #2563eb;
 }
 
 @theme inline {
@@ -29,27 +28,25 @@
   --color-ink: var(--ink);
   --color-ink-muted: var(--ink-muted);
   --color-rule: var(--rule);
-  --font-serif: var(--font-serif);
+  --font-sans: var(--font-sans);
   --font-mono: var(--font-mono);
 }
 
 body {
   background: var(--paper);
   color: var(--ink);
-  font-family: var(--font-serif), Georgia, serif;
-  background-image:
-    radial-gradient(circle at 20% 10%, rgba(0, 0, 0, 0.02), transparent 40%),
-    radial-gradient(circle at 80% 90%, rgba(0, 0, 0, 0.02), transparent 40%);
+  font-family: var(--font-sans), -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
 .font-display {
-  font-family: var(--font-display), Georgia, serif;
+  font-family: var(--font-display), -apple-system, sans-serif;
+  font-weight: 600;
 }
 
 .label-caps {
-  font-family: var(--font-serif), Georgia, serif;
+  font-family: var(--font-sans), sans-serif;
   text-transform: uppercase;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.1em;
   font-size: 0.7rem;
   font-weight: 600;
   color: var(--ink-muted);
@@ -60,26 +57,28 @@ body {
 }
 
 .rule-double {
-  border-top: 1px solid var(--rule-strong);
-  border-bottom: 1px solid var(--rule-strong);
-  height: 3px;
+  border-top: 2px solid var(--ink);
+  height: 2px;
+  opacity: 0.1;
 }
 
 .case-card {
   background: var(--paper-raised);
   border: 1px solid var(--rule);
-  box-shadow: 0 1px 2px rgba(36, 30, 24, 0.06);
+  box-shadow: 0 1px 3px rgba(17, 24, 39, 0.08), 0 1px 2px rgba(17, 24, 39, 0.04);
+  border-radius: 8px;
 }
 
 .stamp-button {
-  font-family: var(--font-serif), Georgia, serif;
+  font-family: var(--font-sans), sans-serif;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.06em;
   font-size: 0.72rem;
   font-weight: 600;
   border-width: 1.5px;
   border-style: solid;
   background: transparent;
+  border-radius: 6px;
   transition: background-color 120ms ease, color 120ms ease;
 }
 
@@ -114,9 +113,10 @@ body {
   background: var(--paper-raised);
   border: 1px solid var(--rule);
   color: var(--ink);
-  font-family: var(--font-serif), Georgia, serif;
+  font-family: var(--font-sans), sans-serif;
   padding: 0.6rem 0.8rem;
   font-size: 0.95rem;
+  border-radius: 6px;
   outline: none;
   transition: border-color 120ms ease;
 }
@@ -125,13 +125,14 @@ body {
 }
 
 .btn-primary {
-  font-family: var(--font-serif), Georgia, serif;
+  font-family: var(--font-sans), sans-serif;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.08em;
   font-size: 0.8rem;
   font-weight: 600;
   background: var(--ink);
   color: var(--paper-raised);
+  border-radius: 6px;
   transition: opacity 120ms ease;
 }
 .btn-primary:hover:not(:disabled) {
