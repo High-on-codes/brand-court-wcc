@@ -1,0 +1,37 @@
+[
+  {
+    "name": "Loopline (meal-prep subscription)",
+    "brief": "Loopline delivers pre-portioned meal kits to college students in a 10-minute pickup window between classes. We compete on speed and price, not gourmet ingredients.",
+    "tagline": "Lunch, solved.",
+    "paletteHex": ["#f4e8c1", "#ffffff", "#e0c9a6"],
+    "siteUrl": ""
+  },
+  {
+    "name": "Northstone Capital (fintech for freelancers)",
+    "brief": "Northstone Capital is a banking app built for freelancers who have irregular income. We auto-split incoming payments into tax, savings, and spend buckets.",
+    "tagline": "Get paid like a company.",
+    "paletteHex": ["#0b1d3a", "#1b1b1b", "#f2f2f2"],
+    "siteUrl": ""
+  },
+  {
+    "name": "Verdant (indoor plant care app)",
+    "brief": "Verdant is a plant-identification and watering-reminder app for first-time plant owners who keep killing their houseplants. Friendly, forgiving tone, not a horticulture textbook.",
+    "tagline": "Keep it alive. We'll remind you.",
+    "paletteHex": ["#2e7d32", "#a5d6a7", "#ffffff"],
+    "siteUrl": ""
+  },
+  {
+    "name": "Hearthline (senior check-in calls)",
+    "brief": "Hearthline pairs isolated seniors with trained volunteer callers for a 15-minute weekly check-in call, with family members able to see a wellness summary afterward.",
+    "tagline": "A voice that checks in.",
+    "paletteHex": ["#8d6e63", "#fff8e1", "#4e342e"],
+    "siteUrl": ""
+  },
+  {
+    "name": "Pigeon (anonymous campus feedback)",
+    "brief": "Pigeon lets students send anonymous feedback directly to professors and TAs mid-semester instead of waiting for end-of-term evaluations that never change anything.",
+    "tagline": "Say it now, not in December.",
+    "paletteHex": ["#ffcc00", "#111111", "#ffffff"],
+    "siteUrl": ""
+  }
+]

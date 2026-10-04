@@ -1,69 +1,165 @@
-import Image from "next/image";
+"use client";
+
+import { useState } from "react";
+import { BriefForm } from "./components/BriefForm";
+import { TrialView } from "./components/TrialView";
+import { BrandKitView } from "./components/BrandKitView";
+import type { BriefInput } from "@/lib/schemas/brief";
+import type {
+  ProsecutorOutput,
+  DefenseOutput,
+  JuryOutput,
+  JudgeOutput,
+  Revision,
+  BrandKit,
+} from "@/lib/schemas/trial";
+import type { PaletteReport } from "@/lib/checks/contrast";
+import type { TrialEvent } from "@/lib/trial/orchestrator";
+
+type Phase = "brief" | "trial" | "kit";
 
 export default function Home() {
+  const [phase, setPhase] = useState<Phase>("brief");
+  const [brief, setBrief] = useState<BriefInput | null>(null);
+  const [trialLoading, setTrialLoading] = useState(false);
+  const [kitLoading, setKitLoading] = useState(false);
+  const [kit, setKit] = useState<BrandKit | null>(null);
+
+  const [evidence, setEvidence] = useState<PaletteReport>();
+  const [charges, setCharges] = useState<ProsecutorOutput>();
+  const [rebuttals, setRebuttals] = useState<DefenseOutput>();
+  const [votes, setVotes] = useState<JuryOutput>();
+  const [verdict, setVerdict] = useState<JudgeOutput>();
+  const [errorMessage, setErrorMessage] = useState<string>();
+
+  async function startTrial(input: BriefInput) {
+    setBrief(input);
+    setPhase("trial");
+    setTrialLoading(true);
+    setEvidence(undefined);
+    setCharges(undefined);
+    setRebuttals(undefined);
+    setVotes(undefined);
+    setVerdict(undefined);
+    setErrorMessage(undefined);
+
+    try {
+      const res = await fetch("/api/trial", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(input),
+      });
+
+      if (!res.ok || !res.body) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(
+          data?.error ? JSON.stringify(data.error) : "Trial request failed"
+        );
+      }
+
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+
+        const chunks = buffer.split("\n\n");
+        buffer = chunks.pop() ?? "";
+
+        for (const chunk of chunks) {
+          const line = chunk.trim();
+          if (!line.startsWith("data:")) continue;
+          const event: TrialEvent = JSON.parse(line.slice(5).trim());
+          applyEvent(event);
+        }
+      }
+    } catch (err) {
+      setErrorMessage(err instanceof Error ? err.message : "Trial failed");
+    } finally {
+      setTrialLoading(false);
+    }
+  }
+
+  function applyEvent(event: TrialEvent) {
+    switch (event.type) {
+      case "evidence":
+        setEvidence(event.data);
+        break;
+      case "charges":
+        setCharges(event.data);
+        break;
+      case "rebuttals":
+        setRebuttals(event.data);
+        break;
+      case "votes":
+        setVotes(event.data);
+        break;
+      case "verdict":
+        setVerdict(event.data);
+        break;
+      case "error":
+        setErrorMessage(event.data.message);
+        break;
+    }
+  }
+
+  async function generateKit(acceptedRevisions: Revision[], verdictSummary: string) {
+    if (!brief) return;
+    setKitLoading(true);
+    try {
+      const res = await fetch("/api/brand-kit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ brief, acceptedRevisions, verdictSummary }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Brand kit compilation failed");
+      setKit(data);
+      setPhase("kit");
+    } catch (err) {
+      setErrorMessage(err instanceof Error ? err.message : "Brand kit failed");
+    } finally {
+      setKitLoading(false);
+    }
+  }
+
+  function restart() {
+    setPhase("brief");
+    setBrief(null);
+    setKit(null);
+  }
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
+    <main className="min-h-screen flex flex-col items-center gap-8 px-6 py-12">
+      <header className="text-center flex flex-col gap-2">
+        <h1 className="text-2xl font-bold">Brand Court</h1>
+        <p className="text-sm text-gray-500 max-w-md">
+          Put your brand on trial. A Prosecutor files charges, Defense rebuts, a
+          jury of target-customer personas votes, and a Judge proposes revisions —
+          you approve every change before it ships.
+        </p>
+      </header>
+
+      {phase === "brief" && <BriefForm onSubmit={startTrial} disabled={trialLoading} />}
+
+      {phase === "trial" && brief && (
+        <TrialView
+          brief={brief}
+          evidence={evidence}
+          charges={charges}
+          rebuttals={rebuttals}
+          votes={votes}
+          verdict={verdict}
+          errorMessage={errorMessage}
+          onReady={generateKit}
+          readyDisabled={kitLoading}
         />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+      )}
+
+      {phase === "kit" && kit && <BrandKitView kit={kit} onRestart={restart} />}
+    </main>
   );
 }
