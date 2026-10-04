@@ -9,6 +9,14 @@ type StructuredCallArgs<T extends z.ZodTypeAny> = {
   system: string;
   prompt: string;
   schema: T;
+  /**
+   * The JSON Schema sent to Gemini as responseJsonSchema. Defaults to
+   * z.toJSONSchema(schema). Pass this separately when `schema` carries a
+   * .superRefine/.refine that z.toJSONSchema can't (and shouldn't) express
+   * structurally — e.g. a cross-field completeness check — so Gemini still
+   * gets a clean shape while safeParse still enforces the refinement.
+   */
+  jsonSchema?: object;
   maxOutputTokens?: number;
 };
 
@@ -24,9 +32,10 @@ export async function callStructuredAgent<T extends z.ZodTypeAny>({
   system,
   prompt,
   schema,
+  jsonSchema,
   maxOutputTokens = 1536,
 }: StructuredCallArgs<T>): Promise<z.infer<T>> {
-  const responseJsonSchema = z.toJSONSchema(schema);
+  const responseJsonSchema = jsonSchema ?? z.toJSONSchema(schema);
 
   const attempt = async (extraUserNote?: string) => {
     const contents = extraUserNote ? `${prompt}\n\n${extraUserNote}` : prompt;

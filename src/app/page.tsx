@@ -14,6 +14,7 @@ import type {
   BrandKit,
 } from "@/lib/schemas/trial";
 import type { PaletteReport } from "@/lib/checks/contrast";
+import type { ChargeTally } from "@/lib/checks/tally";
 import type { TrialEvent } from "@/lib/trial/orchestrator";
 
 type Phase = "brief" | "trial" | "kit";
@@ -46,6 +47,7 @@ export default function Home() {
   const [charges, setCharges] = useState<ProsecutorOutput>();
   const [rebuttals, setRebuttals] = useState<DefenseOutput>();
   const [votes, setVotes] = useState<JuryOutput>();
+  const [tally, setTally] = useState<ChargeTally[]>();
   const [verdict, setVerdict] = useState<JudgeOutput>();
   const [errorMessage, setErrorMessage] = useState<string>();
 
@@ -57,6 +59,7 @@ export default function Home() {
     setCharges(undefined);
     setRebuttals(undefined);
     setVotes(undefined);
+    setTally(undefined);
     setVerdict(undefined);
     setErrorMessage(undefined);
 
@@ -114,6 +117,9 @@ export default function Home() {
       case "votes":
         setVotes(event.data);
         break;
+      case "tally":
+        setTally(event.data);
+        break;
       case "verdict":
         setVerdict(event.data);
         break;
@@ -170,11 +176,13 @@ export default function Home() {
 
         {phase === "trial" && brief && (
           <TrialView
+            caseNumber={caseNumber}
             brief={brief}
             evidence={evidence}
             charges={charges}
             rebuttals={rebuttals}
             votes={votes}
+            tally={tally}
             verdict={verdict}
             errorMessage={errorMessage}
             onReady={generateKit}

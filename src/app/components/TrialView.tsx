@@ -10,28 +10,33 @@ import type {
   Revision,
 } from "@/lib/schemas/trial";
 import type { PaletteReport } from "@/lib/checks/contrast";
+import type { ChargeTally } from "@/lib/checks/tally";
+import { roman } from "@/lib/format/roman";
+import { trialTranscriptToMarkdown } from "@/lib/export/transcript";
 import { RevisionGate, type GateStatus } from "./RevisionGate";
 
 type Props = {
+  caseNumber: string;
   brief: BriefInput;
   evidence?: PaletteReport;
   charges?: ProsecutorOutput;
   rebuttals?: DefenseOutput;
   votes?: JuryOutput;
+  tally?: ChargeTally[];
   verdict?: JudgeOutput;
   errorMessage?: string;
   onReady: (acceptedRevisions: Revision[], verdictSummary: string) => void;
   readyDisabled?: boolean;
 };
 
-const ROMAN = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII"];
-
 export function TrialView({
+  caseNumber,
   brief,
   evidence,
   charges,
   rebuttals,
   votes,
+  tally,
   verdict,
   errorMessage,
   onReady,
@@ -48,12 +53,40 @@ export function TrialView({
   );
 
   const allDecided = useMemo(() => {
-    if (activeRevisions.length === 0) return false;
+    // Zero revisions only happens once a verdict exists and every charge
+    // was dismissed (see orchestrator.ts) — vacuously nothing to decide.
+    if (activeRevisions.length === 0) return true;
     return activeRevisions.every((r) => {
       const s = statuses[r.id] ?? "pending";
       return s === "accepted" || s === "locked";
     });
   }, [activeRevisions, statuses]);
+
+  function handleDownloadTranscript() {
+    if (!charges || !rebuttals || !votes || !tally || !verdict || !evidence) return;
+    const revisionRecords = activeRevisions.map((r) => ({
+      revision: r,
+      status: statuses[r.id] ?? "pending",
+    }));
+    const markdown = trialTranscriptToMarkdown({
+      caseNumber,
+      brief,
+      evidence,
+      charges,
+      rebuttals,
+      votes,
+      tally,
+      verdict,
+      revisionRecords,
+    });
+    const blob = new Blob([markdown], { type: "text/markdown" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${caseNumber}-transcript.md`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
 
   async function handleReject(revision: Revision, feedback: string) {
     setRetrying(revision.id);
@@ -126,7 +159,7 @@ export function TrialView({
 
       {charges && (
         <Section
-          exhibit={`Counts I–${ROMAN[charges.charges.length - 1] ?? charges.charges.length}`}
+          exhibit={`Counts I–${roman(charges.charges.length)}`}
           title="Charges of the Prosecution"
           accent="prosecution"
         >
@@ -134,7 +167,7 @@ export function TrialView({
             {charges.charges.map((c, i) => (
               <li key={c.id} className="pl-4" style={{ borderLeft: "2px solid var(--prosecution)" }}>
                 <p className="label-caps !text-[0.65rem]" style={{ color: "var(--prosecution)" }}>
-                  Count {ROMAN[i] ?? i + 1} · {c.category} · {c.severity}
+                  Count {roman(i + 1)} · {c.category} · {c.severity}
                 </p>
                 <p className="font-medium text-[15px] mt-0.5">{c.title}</p>
                 <p className="text-sm text-ink-muted mt-1 leading-relaxed">{c.description}</p>
@@ -167,7 +200,7 @@ export function TrialView({
             {votes.votes.map((v, i) => (
               <li key={i} className="pl-4" style={{ borderLeft: "2px solid var(--jury)" }}>
                 <p className="label-caps !text-[0.65rem]" style={{ color: "var(--jury)" }}>
-                  Juror {ROMAN[i] ?? i + 1} · {v.persona} · {v.verdict.replace("_", " ")}
+                  Juror {roman(i + 1)} · {v.persona} · {v.verdict.replace("_", " ")}
                 </p>
                 <p className="text-sm text-ink-muted mt-1 leading-relaxed">{v.justification}</p>
               </li>
@@ -176,30 +209,77 @@ export function TrialView({
         </Section>
       )}
 
+      {tally && charges && (
+        <Section exhibit="Exhibit B" title="Tally of the Jury" accent="jury">
+          <ul className="flex flex-col gap-1 font-mono text-[13px]">
+            {tally.map((t) => {
+              const charge = charges.charges.find((c) => c.id === t.chargeId);
+              return (
+                <li key={t.chargeId} className="text-ink-muted">
+                  {charge?.title ?? t.chargeId} —{" "}
+                  <span className="text-ink">
+                    {t.sustain} sustain / {t.dismiss} dismiss
+                  </span>{" "}
+                  →{" "}
+                  <span
+                    className="uppercase"
+                    style={{
+                      color:
+                        t.outcome === "sustained"
+                          ? "var(--prosecution)"
+                          : t.outcome === "dismissed"
+                          ? "var(--defense)"
+                          : "var(--verdict)",
+                    }}
+                  >
+                    {t.outcome}
+                  </span>
+                </li>
+              );
+            })}
+          </ul>
+        </Section>
+      )}
+
       {verdict && (
         <Section exhibit="Final Order" title="Ruling of the Court" accent="verdict">
           <p className="text-sm leading-relaxed mb-5">{verdict.verdictSummary}</p>
-          <div className="flex flex-col gap-4">
-            {activeRevisions.map((r) => (
-              <RevisionGate
-                key={r.id}
-                revision={r}
-                status={retrying === r.id ? "pending" : statuses[r.id] ?? "pending"}
-                retryUsed={!!retried[r.id]}
-                onAccept={() => setStatuses((p) => ({ ...p, [r.id]: "accepted" }))}
-                onLock={() => setStatuses((p) => ({ ...p, [r.id]: "locked" }))}
-                onReject={(feedback) => handleReject(r, feedback)}
-              />
-            ))}
-          </div>
 
-          <button
-            onClick={handleGenerateKit}
-            disabled={!allDecided || readyDisabled}
-            className="btn-primary mt-6 py-3 px-6 w-full"
-          >
-            {readyDisabled ? "Compiling Brand Kit…" : "Enter Final Judgment"}
-          </button>
+          {activeRevisions.length === 0 ? (
+            <p className="text-sm text-ink-muted italic mb-5">
+              Every charge was dismissed — the brand stands as submitted, nothing to revise.
+            </p>
+          ) : (
+            <div className="flex flex-col gap-4">
+              {activeRevisions.map((r) => (
+                <RevisionGate
+                  key={r.id}
+                  revision={r}
+                  status={retrying === r.id ? "pending" : statuses[r.id] ?? "pending"}
+                  retryUsed={!!retried[r.id]}
+                  onAccept={() => setStatuses((p) => ({ ...p, [r.id]: "accepted" }))}
+                  onLock={() => setStatuses((p) => ({ ...p, [r.id]: "locked" }))}
+                  onReject={(feedback) => handleReject(r, feedback)}
+                />
+              ))}
+            </div>
+          )}
+
+          <div className="flex gap-3 mt-6">
+            <button
+              onClick={handleDownloadTranscript}
+              className="stamp-button stamp-lock py-3 px-4"
+            >
+              Download Transcript
+            </button>
+            <button
+              onClick={handleGenerateKit}
+              disabled={!allDecided || readyDisabled}
+              className="btn-primary py-3 px-6 flex-1"
+            >
+              {readyDisabled ? "Compiling Brand Kit…" : "Enter Final Judgment"}
+            </button>
+          </div>
         </Section>
       )}
     </div>

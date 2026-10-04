@@ -10,16 +10,19 @@ import {
   type Revision,
 } from "@/lib/schemas/trial";
 import type { BriefInput } from "@/lib/schemas/brief";
+import type { ChargeTally } from "@/lib/checks/tally";
 
 const SYSTEM = `You are the Judge in Brand Court, an adversarial brand-critique trial.
-Weigh the charges, rebuttals, and jury votes, then issue a verdict summary and one concrete revision per charge that the jury found credible (guilty or mixed).
+You are given the jury's tally for each charge — sustained, dismissed, or hung — computed deterministically from their ballots, not your own reading of the room.
+Do not propose a revision for a dismissed charge; the jury rejected it. Propose one concrete revision for every sustained charge, and for a hung charge propose a cautious, minimal revision and say in the verdict summary that the jury was split.
 Each revision must be concrete and actionable: a specific before/after change to wording, color, or positioning — never vague advice like "improve your messaging".`;
 
 export async function runJudge(
   brief: BriefInput,
   charges: Charge[],
   rebuttals: Rebuttal[],
-  votes: PersonaVote[]
+  votes: PersonaVote[],
+  tally: ChargeTally[]
 ): Promise<JudgeOutput> {
   const chargesBlock = charges
     .map((c) => `- [${c.id}] ${c.title}: ${c.description}`)
@@ -30,8 +33,11 @@ export async function runJudge(
   const votesBlock = votes
     .map((v) => `- ${v.persona}: ${v.verdict} — ${v.justification}`)
     .join("\n");
+  const tallyBlock = tally
+    .map((t) => `- [${t.chargeId}] ${t.sustain} sustain / ${t.dismiss} dismiss → ${t.outcome}`)
+    .join("\n");
 
-  const prompt = `Brand brief:\n${brief.brief}\n\nCharges:\n${chargesBlock}\n\nRebuttals:\n${rebuttalsBlock}\n\nJury votes:\n${votesBlock}\n\nIssue your verdict and proposed revisions.`;
+  const prompt = `Brand brief:\n${brief.brief}\n\nCharges:\n${chargesBlock}\n\nRebuttals:\n${rebuttalsBlock}\n\nJury votes:\n${votesBlock}\n\nDeterministic tally (computed in code, not by you):\n${tallyBlock}\n\nIssue your verdict and proposed revisions.`;
 
   return callStructuredAgent({
     system: SYSTEM,

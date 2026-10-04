@@ -34,10 +34,20 @@ export const DefenseOutputSchema = z.object({
 });
 export type DefenseOutput = z.infer<typeof DefenseOutputSchema>;
 
+export const ChargeVoteSchema = z.object({
+  chargeId: z.string(),
+  sustain: z.boolean(),
+});
+export type ChargeVote = z.infer<typeof ChargeVoteSchema>;
+
 export const PersonaVoteSchema = z.object({
   persona: z.string(),
   verdict: z.enum(["guilty", "not_guilty", "mixed"]),
   justification: z.string(),
+  // One sustain/dismiss call per charge, from this juror — the deterministic
+  // basis for the tally in lib/checks/tally.ts. `verdict` above stays a free
+  // overall impression for narrative color; this is the structured ballot.
+  chargeVotes: z.array(ChargeVoteSchema).min(1),
 });
 export type PersonaVote = z.infer<typeof PersonaVoteSchema>;
 

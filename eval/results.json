@@ -1,25 +1,25 @@
 [
   {
     "name": "Loopline (meal-prep subscription)",
-    "durationMs": 39529,
+    "durationMs": 34646,
     "chargeCount": 4,
     "contrastFailures": 6,
     "rebuttalCount": 4,
-    "juryVotes": "mixed, guilty, guilty",
-    "revisionCount": 3
+    "juryVotes": "mixed, mixed, guilty",
+    "revisionCount": 1
   },
   {
     "name": "Northstone Capital (fintech for freelancers)",
-    "durationMs": 28463,
+    "durationMs": 32760,
     "chargeCount": 4,
     "contrastFailures": 4,
     "rebuttalCount": 4,
-    "juryVotes": "not_guilty, guilty, mixed",
-    "revisionCount": 4
+    "juryVotes": "guilty, mixed, guilty",
+    "revisionCount": 3
   },
   {
     "name": "Verdant (indoor plant care app)",
-    "durationMs": 34021,
+    "durationMs": 23826,
     "chargeCount": 4,
     "contrastFailures": 3,
     "rebuttalCount": 4,
@@ -28,20 +28,20 @@
   },
   {
     "name": "Hearthline (senior check-in calls)",
-    "durationMs": 25128,
+    "durationMs": 27710,
     "chargeCount": 4,
     "contrastFailures": 3,
     "rebuttalCount": 4,
-    "juryVotes": "mixed, not_guilty, guilty",
-    "revisionCount": 3
+    "juryVotes": "mixed, guilty, guilty",
+    "revisionCount": 2
   },
   {
     "name": "Pigeon (anonymous campus feedback)",
-    "durationMs": 27391,
+    "durationMs": 23435,
     "chargeCount": 4,
     "contrastFailures": 4,
     "rebuttalCount": 4,
-    "juryVotes": "mixed, not_guilty, guilty",
+    "juryVotes": "mixed, guilty, guilty",
     "revisionCount": 3
   }
 ]
