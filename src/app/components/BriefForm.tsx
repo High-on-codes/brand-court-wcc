@@ -45,71 +45,82 @@ export function BriefForm({ onSubmit, disabled }: Props) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-5 w-full max-w-xl">
-      <div className="flex flex-col gap-1">
-        <label htmlFor="brief" className="font-medium text-sm">
-          Brand brief <span className="text-red-600">*</span>
-        </label>
+    <form onSubmit={handleSubmit} className="flex flex-col gap-6 w-full">
+      <p className="label-caps text-center">Filing for Review</p>
+
+      <Field label="Brand brief" required htmlFor="brief">
         <textarea
           id="brief"
           required
           minLength={20}
           rows={5}
-          className="border rounded-md p-3 text-sm"
+          className="field-input resize-none"
           placeholder="What does your brand do, who is it for, and what makes it different?"
           value={brief}
           onChange={(e) => setBrief(e.target.value)}
         />
-      </div>
+      </Field>
 
-      <div className="flex flex-col gap-1">
-        <label htmlFor="tagline" className="font-medium text-sm">
-          Tagline (optional)
-        </label>
+      <Field label="Tagline" htmlFor="tagline">
         <input
           id="tagline"
-          className="border rounded-md p-2 text-sm"
+          className="field-input"
           value={tagline}
           onChange={(e) => setTagline(e.target.value)}
         />
-      </div>
+      </Field>
 
-      <div className="flex flex-col gap-1">
-        <label htmlFor="palette" className="font-medium text-sm">
-          Palette hex codes, comma separated (optional)
-        </label>
+      <Field label="Palette (hex, comma separated)" htmlFor="palette">
         <input
           id="palette"
-          className="border rounded-md p-2 text-sm font-mono"
+          className="field-input font-mono text-[13px]"
           placeholder="#1a1a1a, #f5a623, #ffffff"
           value={paletteText}
           onChange={(e) => setPaletteText(e.target.value)}
         />
-      </div>
+      </Field>
 
-      <div className="flex flex-col gap-1">
-        <label htmlFor="siteUrl" className="font-medium text-sm">
-          Site URL (optional)
-        </label>
+      <Field label="Site URL" htmlFor="siteUrl">
         <input
           id="siteUrl"
           type="url"
-          className="border rounded-md p-2 text-sm"
+          className="field-input"
           placeholder="https://"
           value={siteUrl}
           onChange={(e) => setSiteUrl(e.target.value)}
         />
-      </div>
+      </Field>
 
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && (
+        <p className="text-sm" style={{ color: "var(--prosecution)" }}>
+          {error}
+        </p>
+      )}
 
-      <button
-        type="submit"
-        disabled={disabled}
-        className="bg-black text-white rounded-md py-2.5 font-medium disabled:opacity-50"
-      >
-        {disabled ? "Trial in session..." : "Put it on trial"}
+      <button type="submit" disabled={disabled} className="btn-primary py-3 mt-2">
+        {disabled ? "Court is in session…" : "File for Trial"}
       </button>
     </form>
+  );
+}
+
+function Field({
+  label,
+  htmlFor,
+  required,
+  children,
+}: {
+  label: string;
+  htmlFor: string;
+  required?: boolean;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="flex flex-col gap-1.5">
+      <label htmlFor={htmlFor} className="label-caps">
+        {label} {required && <span style={{ color: "var(--prosecution)" }}>*</span>}
+      </label>
+      {children}
+    </div>
   );
 }

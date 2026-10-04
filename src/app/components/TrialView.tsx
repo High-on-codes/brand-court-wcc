@@ -24,6 +24,8 @@ type Props = {
   readyDisabled?: boolean;
 };
 
+const ROMAN = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII"];
+
 export function TrialView({
   brief,
   evidence,
@@ -90,22 +92,31 @@ export function TrialView({
   }
 
   return (
-    <div className="flex flex-col gap-6 w-full max-w-2xl">
+    <div className="flex flex-col gap-8 w-full">
       {errorMessage && (
-        <p className="text-sm text-red-600 border border-red-200 rounded-md p-3 bg-red-50">
-          Trial error: {errorMessage}
+        <p
+          className="text-sm p-3 border"
+          style={{
+            color: "var(--prosecution)",
+            borderColor: "var(--prosecution)",
+            background: "var(--prosecution-bg)",
+          }}
+        >
+          The trial could not proceed: {errorMessage}
         </p>
       )}
 
       {evidence && (
-        <Section title="Deterministic evidence (contrast checks)">
+        <Section exhibit="Exhibit A" title="Deterministic Evidence" accent="ink">
           {evidence.failures.length === 0 ? (
-            <p className="text-sm text-gray-600">No WCAG contrast failures found.</p>
+            <p className="text-sm text-ink-muted italic">
+              No WCAG contrast failures found in the submitted palette.
+            </p>
           ) : (
-            <ul className="text-sm text-gray-700 list-disc pl-5">
+            <ul className="flex flex-col gap-1 font-mono text-[13px]">
               {evidence.failures.map((f, i) => (
-                <li key={i}>
-                  {f.pair} — {f.ratio}:1 ({f.level})
+                <li key={i} className="text-ink-muted">
+                  {f.pair} — <span className="text-ink">{f.ratio}:1</span> ({f.level})
                 </li>
               ))}
             </ul>
@@ -114,54 +125,61 @@ export function TrialView({
       )}
 
       {charges && (
-        <Section title="Prosecutor: charges">
-          <ul className="flex flex-col gap-2">
-            {charges.charges.map((c) => (
-              <li key={c.id} className="text-sm border-l-2 border-red-400 pl-3">
-                <span className="font-medium">
-                  [{c.category}/{c.severity}] {c.title}
-                </span>
-                <p className="text-gray-600">{c.description}</p>
+        <Section
+          exhibit={`Counts I–${ROMAN[charges.charges.length - 1] ?? charges.charges.length}`}
+          title="Charges of the Prosecution"
+          accent="prosecution"
+        >
+          <ol className="flex flex-col gap-4">
+            {charges.charges.map((c, i) => (
+              <li key={c.id} className="pl-4" style={{ borderLeft: "2px solid var(--prosecution)" }}>
+                <p className="label-caps !text-[0.65rem]" style={{ color: "var(--prosecution)" }}>
+                  Count {ROMAN[i] ?? i + 1} · {c.category} · {c.severity}
+                </p>
+                <p className="font-medium text-[15px] mt-0.5">{c.title}</p>
+                <p className="text-sm text-ink-muted mt-1 leading-relaxed">{c.description}</p>
               </li>
             ))}
-          </ul>
+          </ol>
         </Section>
       )}
 
       {rebuttals && (
-        <Section title="Defense: rebuttals">
-          <ul className="flex flex-col gap-2">
+        <Section exhibit="Response" title="Answer of the Defense" accent="defense">
+          <ol className="flex flex-col gap-4">
             {rebuttals.rebuttals.map((r, i) => (
-              <li key={i} className="text-sm border-l-2 border-blue-400 pl-3">
-                <p className="text-gray-700">{r.response}</p>
+              <li key={i} className="pl-4" style={{ borderLeft: "2px solid var(--defense)" }}>
+                <p className="text-sm leading-relaxed">{r.response}</p>
                 {r.concession && (
-                  <span className="text-xs text-gray-500 italic">conceded</span>
+                  <p className="label-caps !text-[0.62rem] mt-1" style={{ color: "var(--defense)" }}>
+                    Conceded
+                  </p>
                 )}
               </li>
             ))}
-          </ul>
+          </ol>
         </Section>
       )}
 
       {votes && (
-        <Section title="Jury: persona votes">
-          <ul className="flex flex-col gap-2">
+        <Section exhibit="Deliberation" title="Verdict of the Jury" accent="jury">
+          <ol className="flex flex-col gap-4">
             {votes.votes.map((v, i) => (
-              <li key={i} className="text-sm border-l-2 border-purple-400 pl-3">
-                <span className="font-medium">
-                  {v.persona} — {v.verdict}
-                </span>
-                <p className="text-gray-600">{v.justification}</p>
+              <li key={i} className="pl-4" style={{ borderLeft: "2px solid var(--jury)" }}>
+                <p className="label-caps !text-[0.65rem]" style={{ color: "var(--jury)" }}>
+                  Juror {ROMAN[i] ?? i + 1} · {v.persona} · {v.verdict.replace("_", " ")}
+                </p>
+                <p className="text-sm text-ink-muted mt-1 leading-relaxed">{v.justification}</p>
               </li>
             ))}
-          </ul>
+          </ol>
         </Section>
       )}
 
       {verdict && (
-        <Section title="Judge: verdict and proposed revisions">
-          <p className="text-sm text-gray-700 mb-3">{verdict.verdictSummary}</p>
-          <div className="flex flex-col gap-3">
+        <Section exhibit="Final Order" title="Ruling of the Court" accent="verdict">
+          <p className="text-sm leading-relaxed mb-5">{verdict.verdictSummary}</p>
+          <div className="flex flex-col gap-4">
             {activeRevisions.map((r) => (
               <RevisionGate
                 key={r.id}
@@ -178,9 +196,9 @@ export function TrialView({
           <button
             onClick={handleGenerateKit}
             disabled={!allDecided || readyDisabled}
-            className="mt-4 bg-black text-white rounded-md py-2.5 px-4 font-medium disabled:opacity-40 text-sm"
+            className="btn-primary mt-6 py-3 px-6 w-full"
           >
-            {readyDisabled ? "Compiling brand kit..." : "Generate final brand kit"}
+            {readyDisabled ? "Compiling Brand Kit…" : "Enter Final Judgment"}
           </button>
         </Section>
       )}
@@ -188,13 +206,34 @@ export function TrialView({
   );
 }
 
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
+const ACCENT_VAR: Record<string, string> = {
+  ink: "var(--ink)",
+  prosecution: "var(--prosecution)",
+  defense: "var(--defense)",
+  jury: "var(--jury)",
+  verdict: "var(--verdict)",
+};
+
+function Section({
+  exhibit,
+  title,
+  accent,
+  children,
+}: {
+  exhibit: string;
+  title: string;
+  accent: keyof typeof ACCENT_VAR;
+  children: React.ReactNode;
+}) {
   return (
-    <div className="flex flex-col gap-2">
-      <h3 className="font-semibold text-sm uppercase tracking-wide text-gray-500">
-        {title}
-      </h3>
+    <section className="flex flex-col gap-3">
+      <div className="flex items-baseline justify-between gap-3 border-b pb-2 rule-hairline">
+        <h3 className="font-display text-lg" style={{ color: ACCENT_VAR[accent] }}>
+          {title}
+        </h3>
+        <span className="label-caps !text-[0.62rem] whitespace-nowrap">{exhibit}</span>
+      </div>
       {children}
-    </div>
+    </section>
   );
 }

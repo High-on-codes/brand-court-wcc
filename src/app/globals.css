@@ -1,26 +1,143 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Editorial courtroom palette — a fixed paper theme, not OS dark/light. */
+  --paper: #f1ead9;
+  --paper-raised: #faf6ec;
+  --ink: #241e18;
+  --ink-muted: #6e6050;
+  --rule: #c9b998;
+  --rule-strong: #8d7a5c;
+
+  --prosecution: #7a2420;
+  --prosecution-bg: #f6e6e2;
+  --defense: #1f3a5f;
+  --defense-bg: #e4ebf2;
+  --jury: #4a3b5c;
+  --jury-bg: #ece6f0;
+  --verdict: #7a5c1e;
+  --verdict-bg: #f3ecd9;
+
+  --stamp-accept: #2f5233;
+  --stamp-reject: #7a2420;
+  --stamp-lock: #1f3a5f;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-paper: var(--paper);
+  --color-paper-raised: var(--paper-raised);
+  --color-ink: var(--ink);
+  --color-ink-muted: var(--ink-muted);
+  --color-rule: var(--rule);
+  --font-serif: var(--font-serif);
+  --font-mono: var(--font-mono);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-serif), Georgia, serif;
+  background-image:
+    radial-gradient(circle at 20% 10%, rgba(0, 0, 0, 0.02), transparent 40%),
+    radial-gradient(circle at 80% 90%, rgba(0, 0, 0, 0.02), transparent 40%);
+}
+
+.font-display {
+  font-family: var(--font-display), Georgia, serif;
+}
+
+.label-caps {
+  font-family: var(--font-serif), Georgia, serif;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--ink-muted);
+}
+
+.rule-hairline {
+  border-color: var(--rule);
+}
+
+.rule-double {
+  border-top: 1px solid var(--rule-strong);
+  border-bottom: 1px solid var(--rule-strong);
+  height: 3px;
+}
+
+.case-card {
+  background: var(--paper-raised);
+  border: 1px solid var(--rule);
+  box-shadow: 0 1px 2px rgba(36, 30, 24, 0.06);
+}
+
+.stamp-button {
+  font-family: var(--font-serif), Georgia, serif;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.72rem;
+  font-weight: 600;
+  border-width: 1.5px;
+  border-style: solid;
+  background: transparent;
+  transition: background-color 120ms ease, color 120ms ease;
+}
+
+.stamp-accept {
+  color: var(--stamp-accept);
+  border-color: var(--stamp-accept);
+}
+.stamp-accept:hover {
+  background: var(--stamp-accept);
+  color: var(--paper-raised);
+}
+
+.stamp-reject {
+  color: var(--stamp-reject);
+  border-color: var(--stamp-reject);
+}
+.stamp-reject:hover {
+  background: var(--stamp-reject);
+  color: var(--paper-raised);
+}
+
+.stamp-lock {
+  color: var(--stamp-lock);
+  border-color: var(--stamp-lock);
+}
+.stamp-lock:hover {
+  background: var(--stamp-lock);
+  color: var(--paper-raised);
+}
+
+.field-input {
+  background: var(--paper-raised);
+  border: 1px solid var(--rule);
+  color: var(--ink);
+  font-family: var(--font-serif), Georgia, serif;
+  padding: 0.6rem 0.8rem;
+  font-size: 0.95rem;
+  outline: none;
+  transition: border-color 120ms ease;
+}
+.field-input:focus {
+  border-color: var(--rule-strong);
+}
+
+.btn-primary {
+  font-family: var(--font-serif), Georgia, serif;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 0.8rem;
+  font-weight: 600;
+  background: var(--ink);
+  color: var(--paper-raised);
+  transition: opacity 120ms ease;
+}
+.btn-primary:hover:not(:disabled) {
+  opacity: 0.85;
+}
+.btn-primary:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }

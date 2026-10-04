@@ -21,69 +21,67 @@ export function BrandKitView({ kit, onRestart }: Props) {
   }
 
   return (
-    <div className="flex flex-col gap-5 w-full max-w-xl">
-      <h2 className="text-lg font-semibold">Approved brand kit</h2>
-
-      <div>
-        <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide mb-1">
-          Tagline
-        </h3>
-        <p className="text-sm">{kit.tagline}</p>
+    <div className="flex flex-col gap-7 w-full">
+      <div className="text-center flex flex-col items-center gap-2">
+        <p className="label-caps" style={{ color: "var(--verdict)" }}>
+          Entered into the Record
+        </p>
+        <h2 className="font-display text-2xl">Certificate of Brand Kit</h2>
+        <div className="rule-double w-16 my-1" />
       </div>
 
       <div>
-        <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide mb-2">
-          Palette
-        </h3>
-        <div className="flex flex-col gap-2">
+        <p className="label-caps mb-1.5">Tagline</p>
+        <p className="font-display text-xl italic">&ldquo;{kit.tagline}&rdquo;</p>
+      </div>
+
+      <div>
+        <p className="label-caps mb-2">Palette</p>
+        <div className="flex flex-col gap-2.5">
           {kit.palette.map((p, i) => (
             <div key={i} className="flex items-center gap-3 text-sm">
               <span
-                className="w-6 h-6 rounded border inline-block shrink-0"
+                className="w-7 h-7 border shrink-0 rule-hairline"
                 style={{ backgroundColor: p.hex }}
               />
-              <span className="font-mono">{p.hex}</span>
-              <span className="text-gray-600">{p.role}</span>
-              <span className="text-gray-400 text-xs">{p.contrastNote}</span>
+              <span className="font-mono text-[13px]">{p.hex}</span>
+              <span className="text-ink-muted">{p.role}</span>
+              <span className="text-ink-muted text-xs italic hidden sm:inline">
+                {p.contrastNote}
+              </span>
             </div>
           ))}
         </div>
       </div>
 
       <div>
-        <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide mb-1">
-          Type pairing
-        </h3>
+        <p className="label-caps mb-1">Type Pairing</p>
         <p className="text-sm">
-          Heading: <span className="font-medium">{kit.typePairing.heading}</span> · Body:{" "}
-          <span className="font-medium">{kit.typePairing.body}</span>
+          Heading: <span className="font-display">{kit.typePairing.heading}</span> · Body:{" "}
+          <span className="italic">{kit.typePairing.body}</span>
         </p>
-        <p className="text-xs text-gray-500 mt-1">{kit.typePairing.rationale}</p>
+        <p className="text-xs text-ink-muted mt-1 leading-relaxed">
+          {kit.typePairing.rationale}
+        </p>
       </div>
 
       <div>
-        <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide mb-1">
-          Voice rules
-        </h3>
-        <ul className="list-disc pl-5 text-sm">
+        <p className="label-caps mb-1.5">Voice Rules</p>
+        <ol className="flex flex-col gap-1.5">
           {kit.voiceRules.map((rule, i) => (
-            <li key={i}>{rule}</li>
+            <li key={i} className="text-sm pl-4" style={{ borderLeft: "2px solid var(--verdict)" }}>
+              {rule}
+            </li>
           ))}
-        </ul>
+        </ol>
       </div>
 
-      <div className="flex gap-2">
-        <button
-          onClick={handleDownload}
-          className="bg-black text-white rounded-md py-2 px-4 text-sm font-medium"
-        >
+      <div className="flex gap-3 pt-2 border-t rule-hairline">
+        <button onClick={handleDownload} className="btn-primary py-2.5 px-4 flex-1">
           Download Markdown
         </button>
-        <button
-          onClick={onRestart}
-          className="border rounded-md py-2 px-4 text-sm font-medium"
-        >
-          New trial
+        <button onClick={onRestart} className="stamp-button stamp-lock py-2.5 px-4">
+          New Trial
         </button>
       </div>
     </div>
