@@ -20,7 +20,7 @@ Indie founders and student startups ship with no brand critique. They can't affo
 ## Why this isn't a "generate my brand" wrapper
 
 - **Deterministic evidence, not vibes.** `src/lib/checks/contrast.ts` computes real WCAG 2.x contrast ratios (relative luminance formula) for every palette color against white, black, and every other palette color. The Prosecutor is handed this evidence and told explicitly not to estimate contrast itself — accessibility charges are grounded in numbers the LLM didn't produce.
-- **Structured outputs, not prompt-and-pray.** Every agent call is a forced tool-use turn (`src/lib/agents/client.ts`) whose `input_schema` is generated directly from a zod schema (`z.toJSONSchema`). The response is validated against that same zod schema; a validation failure triggers exactly one retry with the validation errors fed back to the model, then throws — no silent fallback.
+- **Structured outputs, not prompt-and-pray.** Every agent call (`src/lib/agents/client.ts`) requests `responseMimeType: "application/json"` with a `responseJsonSchema` generated directly from a zod schema (`z.toJSONSchema`) — one source of truth for the shape. The parsed response is validated against that same zod schema; a validation or parse failure triggers exactly one retry with the error fed back to the model, then throws — no silent fallback.
 - **A human gate on every revision**, not just a final "approve all" button. Rejecting a revision costs the Judge exactly one retry, enforced both server-side (the retry endpoint is single-shot) and in the UI (the reject control disappears after one use).
 - **Adversarial, not generative.** The four roles (Prosecutor, Defense, Jury, Judge) argue against each other over a shared, append-only record of charges → rebuttals → votes → verdict. No agent can see a later stage's output before it exists.
 
@@ -29,7 +29,7 @@ Indie founders and student startups ship with no brand critique. They can't affo
 - **Next.js 16 (App Router)**, deployed on Vercel. No database — all trial state lives client-side in React state; nothing is persisted server-side.
 - **Streaming**: `POST /api/trial` returns a `ReadableStream` of newline-delimited `data: {...}` events (one per completed trial phase), consumed client-side with a manual `fetch` + reader loop (not `EventSource`, since that doesn't support POST bodies).
 - **Agents** (`src/lib/agents/`): one file per role (`prosecutor.ts`, `defense.ts`, `jury.ts`, `judge.ts`, `brandKit.ts`), all built on the shared `callStructuredAgent` helper in `client.ts`.
-- **Schemas** (`src/lib/schemas/`): zod schemas for the brief input and every agent's output — the single source of truth for both validation and the tool `input_schema` sent to Claude.
+- **Schemas** (`src/lib/schemas/`): zod schemas for the brief input and every agent's output — the single source of truth for both validation and the `responseJsonSchema` sent to Gemini.
 - **Checks** (`src/lib/checks/contrast.ts`): pure, deterministic WCAG contrast math — zero LLM calls, fully unit-testable.
 - **Orchestration** (`src/lib/trial/orchestrator.ts`): an async generator that runs the four-agent trial in sequence and yields an event after each phase, so the API route can stream it.
 - **Eval** (`eval/`): 5 fixture brand briefs (`brands.json`) run end-to-end through the real agent pipeline by `npm run eval`, producing `eval/results.json` and `eval/results.md` — a results table covering charge counts, contrast failures found, rebuttal counts, jury verdicts, revision counts, and latency per brand.
@@ -50,11 +50,11 @@ eval/               fixture brands + eval runner + results
 
 ```bash
 npm install
-cp .env.example .env.local   # add your ANTHROPIC_API_KEY
+cp .env.example .env.local   # add your GEMINI_API_KEY (console: aistudio.google.com/apikey)
 npm run dev
 ```
 
-Run the eval set (requires `ANTHROPIC_API_KEY`, makes real API calls against the 5 fixture brands):
+Run the eval set (requires `GEMINI_API_KEY`, makes real API calls against the 5 fixture brands):
 
 ```bash
 npm run eval
@@ -65,7 +65,7 @@ npm run eval
 - **Human gate on every revision** — nothing reaches the final brand kit without an explicit accept or lock.
 - **Visible reasoning** — every charge, rebuttal, vote, and verdict is shown in full, not summarized or hidden behind a "thinking" spinner.
 - **No data stored** — no database; a closed browser tab loses the trial, by design.
-- **AI disclosure** — this project uses the Claude API (Anthropic) for all four trial agents and the brand-kit compiler. Claude Code was used as a coding assistant during development (scaffolding, agent prompts, schemas, orchestration, validation/retry logic, contrast engine, eval set).
+- **AI disclosure** — this project uses the Gemini API (Google, `gemini-3.8-flash`) for all four trial agents and the brand-kit compiler. Claude Code (Anthropic) was used as a coding assistant during development (scaffolding, agent prompts, schemas, orchestration, validation/retry logic, contrast engine, eval set) — it does not run in the deployed app.
 
 ## Team
 

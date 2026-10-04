@@ -29,7 +29,5 @@ export async function runJury(
     system: SYSTEM,
     prompt,
     schema: JuryOutputSchema,
-    toolName: "cast_votes",
-    toolDescription: "Cast three target-customer persona votes.",
   });
 }

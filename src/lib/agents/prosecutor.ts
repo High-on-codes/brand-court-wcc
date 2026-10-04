@@ -28,7 +28,5 @@ export async function runProsecutor(
     system: SYSTEM,
     prompt,
     schema: ProsecutorOutputSchema,
-    toolName: "file_charges",
-    toolDescription: "File formal charges against the brand under review.",
   });
 }

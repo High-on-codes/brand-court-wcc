@@ -24,7 +24,5 @@ export async function runDefense(
     system: SYSTEM,
     prompt,
     schema: DefenseOutputSchema,
-    toolName: "file_rebuttals",
-    toolDescription: "File one rebuttal per charge id.",
   });
 }

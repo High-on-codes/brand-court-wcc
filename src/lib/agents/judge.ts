@@ -37,9 +37,7 @@ export async function runJudge(
     system: SYSTEM,
     prompt,
     schema: JudgeOutputSchema,
-    toolName: "issue_verdict",
-    toolDescription: "Issue the verdict summary and proposed revisions.",
-    maxTokens: 2048,
+    maxOutputTokens: 2048,
   });
 }
 
@@ -57,7 +55,5 @@ export async function runJudgeRetry(
     system: RETRY_SYSTEM,
     prompt,
     schema: RevisionRetrySchema,
-    toolName: "retry_revision",
-    toolDescription: "Propose exactly one replacement revision.",
   });
 }

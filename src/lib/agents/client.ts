@@ -1,73 +1,75 @@
-import Anthropic from "@anthropic-ai/sdk";
+import { GoogleGenAI } from "@google/genai";
 import { z } from "zod";
 
-const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+const genai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
-export const AGENT_MODEL = "claude-sonnet-5";
+export const AGENT_MODEL = "gemini-3.8-flash";
 
 type StructuredCallArgs<T extends z.ZodTypeAny> = {
   system: string;
   prompt: string;
   schema: T;
-  toolName: string;
-  toolDescription: string;
-  maxTokens?: number;
+  maxOutputTokens?: number;
 };
 
 /**
- * Calls Claude with a forced tool-use turn so the response is structured
- * JSON by construction, then validates it against the zod schema. On a
- * validation failure it retries exactly once, feeding the validation
- * errors back to the model. A second failure throws — callers must not
- * retry further (this is the "one auto-retry" contract from the plan).
+ * Calls Gemini with responseMimeType "application/json" + a JSON Schema
+ * (derived straight from the zod schema via z.toJSONSchema, so there's one
+ * source of truth for shape), then validates the parsed JSON against the
+ * same zod schema. On a validation or parse failure it retries exactly
+ * once, feeding the error back to the model. A second failure throws —
+ * callers must not retry further (the "one auto-retry" contract).
  */
 export async function callStructuredAgent<T extends z.ZodTypeAny>({
   system,
   prompt,
   schema,
-  toolName,
-  toolDescription,
-  maxTokens = 1536,
+  maxOutputTokens = 1536,
 }: StructuredCallArgs<T>): Promise<z.infer<T>> {
-  const inputSchema = z.toJSONSchema(schema) as Anthropic.Tool.InputSchema;
-
-  const tool: Anthropic.Tool = {
-    name: toolName,
-    description: toolDescription,
-    input_schema: inputSchema,
-  };
+  const responseJsonSchema = z.toJSONSchema(schema);
 
   const attempt = async (extraUserNote?: string) => {
-    const messages: Anthropic.MessageParam[] = [
-      { role: "user", content: extraUserNote ? `${prompt}\n\n${extraUserNote}` : prompt },
-    ];
+    const contents = extraUserNote ? `${prompt}\n\n${extraUserNote}` : prompt;
 
-    const response = await anthropic.messages.create({
+    const response = await genai.models.generateContent({
       model: AGENT_MODEL,
-      max_tokens: maxTokens,
-      system,
-      messages,
-      tools: [tool],
-      tool_choice: { type: "tool", name: toolName },
+      contents,
+      config: {
+        systemInstruction: system,
+        responseMimeType: "application/json",
+        responseJsonSchema,
+        maxOutputTokens,
+      },
     });
 
-    const toolUse = response.content.find(
-      (block): block is Anthropic.ToolUseBlock => block.type === "tool_use"
-    );
-    if (!toolUse) {
-      throw new Error(`Agent "${toolName}" returned no tool_use block`);
+    const text = response.text;
+    if (!text) {
+      return { success: false as const, error: new Error("Gemini returned no text") };
     }
-    return schema.safeParse(toolUse.input);
+
+    let parsed: unknown;
+    try {
+      parsed = JSON.parse(text);
+    } catch {
+      return {
+        success: false as const,
+        error: new Error(`Gemini response was not valid JSON: ${text.slice(0, 200)}`),
+      };
+    }
+
+    const result = schema.safeParse(parsed);
+    if (!result.success) {
+      return { success: false as const, error: result.error };
+    }
+    return { success: true as const, data: result.data };
   };
 
   const first = await attempt();
   if (first.success) return first.data;
 
-  const errorNote = `Your previous response failed schema validation:\n${first.error.message}\nCall the tool again with corrected arguments that satisfy the schema exactly.`;
+  const errorNote = `Your previous response failed schema validation:\n${first.error.message}\nReturn corrected JSON that satisfies the schema exactly.`;
   const retry = await attempt(errorNote);
   if (retry.success) return retry.data;
 
-  throw new Error(
-    `Agent "${toolName}" failed schema validation twice: ${retry.error.message}`
-  );
+  throw new Error(`Agent call failed schema validation twice: ${retry.error.message}`);
 }

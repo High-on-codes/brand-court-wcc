@@ -38,9 +38,9 @@ type BrandResult = {
 };
 
 async function main() {
-  if (!process.env.ANTHROPIC_API_KEY) {
+  if (!process.env.GEMINI_API_KEY) {
     console.error(
-      "ANTHROPIC_API_KEY is not set. Add it to .env.local or export it before running `npm run eval`."
+      "GEMINI_API_KEY is not set. Add it to .env.local or export it before running `npm run eval`."
     );
     process.exit(1);
   }

@@ -24,8 +24,6 @@ export async function runBrandKitCompiler(
     system: SYSTEM,
     prompt,
     schema: BrandKitSchema,
-    toolName: "compile_brand_kit",
-    toolDescription: "Compile the final approved brand kit.",
-    maxTokens: 1536,
+    maxOutputTokens: 1536,
   });
 }
