@@ -2,6 +2,11 @@ import { BriefInputSchema } from "@/lib/schemas/brief";
 import { runTrial } from "@/lib/trial/orchestrator";
 
 export const runtime = "nodejs";
+// A full trial runs 4 sequential Gemini calls and took 25-40s in local eval
+// runs. Vercel's default function timeout (10s on Hobby) would kill this
+// mid-trial; 60 is the max Hobby allows and covers the observed range with
+// headroom. Raise further if deploying on a plan that allows it.
+export const maxDuration = 60;
 
 export async function POST(req: Request) {
   const json = await req.json();

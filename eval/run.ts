@@ -1,22 +1,13 @@
-import { readFileSync, writeFileSync, existsSync } from "node:fs";
+import { readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { runTrial, type TrialEvent } from "../src/lib/trial/orchestrator";
 import { BriefInputSchema } from "../src/lib/schemas/brief";
 
-// Minimal .env.local loader so `npm run eval` works without an extra
-// dependency — only sets keys that aren't already in the environment.
-function loadEnvLocal() {
-  const path = join(process.cwd(), ".env.local");
-  if (!existsSync(path)) return;
-  for (const line of readFileSync(path, "utf-8").split("\n")) {
-    const match = line.match(/^\s*([A-Z_][A-Z0-9_]*)\s*=\s*(.*)\s*$/);
-    if (!match) continue;
-    const [, key, rawValue] = match;
-    if (process.env[key] !== undefined) continue;
-    process.env[key] = rawValue.replace(/^["']|["']$/g, "");
-  }
-}
-loadEnvLocal();
+// GEMINI_API_KEY must already be in process.env by the time this module's
+// imports resolve, since agents/client.ts reads it at import time — the
+// `--env-file` flag on the `eval` npm script handles that. A loader inside
+// this file would run too late: ES module imports evaluate before this
+// file's own top-level code does.
 
 type BrandFixture = {
   name: string;

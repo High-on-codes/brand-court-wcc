@@ -4,6 +4,7 @@ import { RevisionSchema } from "@/lib/schemas/trial";
 import { runBrandKitCompiler } from "@/lib/agents/brandKit";
 
 export const runtime = "nodejs";
+export const maxDuration = 30;
 
 const RequestSchema = z.object({
   brief: BriefInputSchema,

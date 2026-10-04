@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "eval": "tsx eval/run.ts"
+    "eval": "node --env-file=.env.local --import tsx eval/run.ts"
   },
   "dependencies": {
     "@google/genai": "^2.27.0",

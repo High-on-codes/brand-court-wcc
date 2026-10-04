@@ -1,0 +1,47 @@
+[
+  {
+    "name": "Loopline (meal-prep subscription)",
+    "durationMs": 39529,
+    "chargeCount": 4,
+    "contrastFailures": 6,
+    "rebuttalCount": 4,
+    "juryVotes": "mixed, guilty, guilty",
+    "revisionCount": 3
+  },
+  {
+    "name": "Northstone Capital (fintech for freelancers)",
+    "durationMs": 28463,
+    "chargeCount": 4,
+    "contrastFailures": 4,
+    "rebuttalCount": 4,
+    "juryVotes": "not_guilty, guilty, mixed",
+    "revisionCount": 4
+  },
+  {
+    "name": "Verdant (indoor plant care app)",
+    "durationMs": 34021,
+    "chargeCount": 4,
+    "contrastFailures": 3,
+    "rebuttalCount": 4,
+    "juryVotes": "not_guilty, guilty, mixed",
+    "revisionCount": 2
+  },
+  {
+    "name": "Hearthline (senior check-in calls)",
+    "durationMs": 25128,
+    "chargeCount": 4,
+    "contrastFailures": 3,
+    "rebuttalCount": 4,
+    "juryVotes": "mixed, not_guilty, guilty",
+    "revisionCount": 3
+  },
+  {
+    "name": "Pigeon (anonymous campus feedback)",
+    "durationMs": 27391,
+    "chargeCount": 4,
+    "contrastFailures": 4,
+    "rebuttalCount": 4,
+    "juryVotes": "mixed, not_guilty, guilty",
+    "revisionCount": 3
+  }
+]

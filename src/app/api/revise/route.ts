@@ -4,6 +4,7 @@ import { RevisionSchema } from "@/lib/schemas/trial";
 import { runJudgeRetry } from "@/lib/agents/judge";
 
 export const runtime = "nodejs";
+export const maxDuration = 30;
 
 const ReviseRequestSchema = z.object({
   brief: BriefInputSchema,

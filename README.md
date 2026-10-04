@@ -34,6 +34,18 @@ Indie founders and student startups ship with no brand critique. They can't affo
 - **Orchestration** (`src/lib/trial/orchestrator.ts`): an async generator that runs the four-agent trial in sequence and yields an event after each phase, so the API route can stream it.
 - **Eval** (`eval/`): 5 fixture brand briefs (`brands.json`) run end-to-end through the real agent pipeline by `npm run eval`, producing `eval/results.json` and `eval/results.md` — a results table covering charge counts, contrast failures found, rebuttal counts, jury verdicts, revision counts, and latency per brand.
 
+### Eval results (5/5 brands, 0 schema-validation retries needed)
+
+| Brand | Charges | Contrast failures | Rebuttals | Jury votes | Revisions | Duration (ms) |
+|---|---|---|---|---|---|---|
+| Loopline (meal-prep subscription) | 4 | 6 | 4 | mixed, guilty, guilty | 3 | 39529 |
+| Northstone Capital (fintech for freelancers) | 4 | 4 | 4 | not_guilty, guilty, mixed | 4 | 28463 |
+| Verdant (indoor plant care app) | 4 | 3 | 4 | not_guilty, guilty, mixed | 2 | 34021 |
+| Hearthline (senior check-in calls) | 4 | 3 | 4 | mixed, not_guilty, guilty | 3 | 25128 |
+| Pigeon (anonymous campus feedback) | 4 | 4 | 4 | mixed, not_guilty, guilty | 3 | 27391 |
+
+Full per-field output is in `eval/results.json`.
+
 ```
 src/
   app/              UI (brief form, trial view, revision gate, brand kit view)
@@ -59,6 +71,14 @@ Run the eval set (requires `GEMINI_API_KEY`, makes real API calls against the 5 
 ```bash
 npm run eval
 ```
+
+## Deploy (Vercel)
+
+1. Push this repo to GitHub, then import it at [vercel.com/new](https://vercel.com/new) — Next.js is auto-detected, no build config needed.
+2. In the project's Vercel settings, add an environment variable `GEMINI_API_KEY` with your key. `.env.local` is gitignored on purpose and never reaches Vercel on its own.
+3. Deploy. The three API routes (`/api/trial`, `/api/revise`, `/api/brand-kit`) are forced to `runtime = "nodejs"`.
+
+**Function timeout note:** a full trial runs 4 sequential Gemini calls and took 25-40s against the live API in local eval runs. `/api/trial` sets `export const maxDuration = 60` — the maximum Vercel's free Hobby tier allows — to cover that. If a trial still times out in production (slower cold starts, a larger brief), the real fix is either a paid plan with a higher `maxDuration` ceiling, or restructuring `/api/trial` to persist partial progress so a timeout doesn't lose completed phases — not raising the number further, since Hobby is already capped at 60.
 
 ## Responsible design
 
