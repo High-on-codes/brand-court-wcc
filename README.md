@@ -92,8 +92,8 @@ npm run eval
 
 ## Team
 
-- **Noaman** — agent prompts, schemas, orchestration, validation/retry logic, contrast checks, eval set, this README.
-- **Ritika** — UI/trial view polish, deploy, interviews, demo video, repo hygiene, submission upload.
+- **Noaman** — agent prompts, schemas, orchestration, validation/retry logic, contrast and jury-tally engines, Gemini API integration, eval set, Vercel deployment, user interviews, demo video, this README.
+- **Ritika** — UI theme and typography redesign (Inter/Space Grotesk, color system), implemented and committed directly.
 
 ## Cut list (if behind schedule)
 
